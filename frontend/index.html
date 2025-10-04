@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Booking - The Scenic Inn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #752f15;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60%;
+            width: 80%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+
+        .progress-step.active:not(:last-child)::after {
+            background: #752f15;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active .step-number {
+            background: #752f15;
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background: #28a745;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .progress-step.active .step-label {
+            color: #752f15;
+            font-weight: 600;
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+            padding: 40px;
+            min-height: 400px;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .step-header h2 {
+            color: #752f15;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .step-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #752f15;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .party-size-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .party-size-input button {
+            background: #752f15;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .party-size-input button:hover {
+            background: #5a2410;
+        }
+
+        .party-size-input input {
+            width: 80px;
+            text-align: center;
+        }
+
+        /* Menu Info Card */
+        .menu-info-card {
+            background: #f8f9fa;
+            border: 2px solid #752f15;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .menu-info-card h3 {
+            color: #752f15;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .menu-info-card p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        /* Menu Selection */
+        .menu-selection {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        .person-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .person-header h3 {
+            color: #752f15;
+            margin: 0;
+        }
+
+        .remove-person {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .course-selection {
+            margin-bottom: 15px;
+        }
+
+        .course-selection label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .menu-item.selected {
+            background: #752f15;
+            color: white;
+        }
+
+        .menu-item .price {
+            font-weight: 600;
+        }
+
+        /* Navigation Buttons */
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Loading and Messages */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .step-content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .step-label {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Group Booking</h1>
+            <p>Book your group dining experience at The Scenic Inn</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Party Details</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Date & Time</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Menu Selection</span>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Contact Details</span>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <span class="step-number">5</span>
+                    <span class="step-label">Confirmation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Party Details -->
+        <div class="step-content active" id="step-1">
+            <div class="step-header">
+                <h2>Party Details</h2>
+                <p>Let's start with the basics</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="partySize">Party Size *</label>
+                <div class="party-size-input">
+                    <button type="button" onclick="changePartySize(-1)">-</button>
+                    <input type="number" id="partySize" name="partySize" value="2" min="2" max="20" readonly>
+                    <button type="button" onclick="changePartySize(1)">+</button>
+                </div>
+            </div>
+
+            <div class="step-navigation">
+                <div></div>
+                <button class="btn btn-primary" onclick="nextStep()">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Date & Time -->
+        <div class="step-content" id="step-2">
+            <div class="step-header">
+                <h2>Date & Time</h2>
+                <p>Choose your preferred date and time</p>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date">Preferred Date *</label>
+                    <input type="date" id="date" name="date" required onchange="handleDateChange()">
+                </div>
+
+                <div class="form-group">
+                    <label for="time">Preferred Time *</label>
+                    <select id="time" name="time" required onchange="handleTimeChange()">
+                        <option value="">Select date first</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="step-navigation">
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn btn-primary" onclick="nextStep()" id="nextBtn2" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Menu Selection -->
+        <div class="step-content" id="step-3">
+            <div class="step-header">
+                <h2>Menu Selection</h2>
+                <p id="menu-instruction">Your menu has been automatically selected based on your date and time</p>
+            </div>
+
+            <div class="menu-info-card" id="menu-info-card" style="display: none;">
+                <h3 id="selected-menu-name">Menu Name</h3>
+                <p id="selected-menu-description">Menu description will appear here</p>
+            </div>
+
+            <div id="menuSelections"></div>
+
+            <div class="step-navigation">
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn btn-primary" onclick="nextStep()" id="nextBtn3" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Contact Details -->
+        <div class="step-content" id="step-4">
+            <div class="step-header">
+                <h2>Contact Details</h2>
+                <p>We'll use this to confirm your booking</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactName">Contact Name *</label>
+                <input type="text" id="contactName" name="contactName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contactEmail">Contact Email *</label>
+                <input type="email" id="contactEmail" name="contactEmail" required>
+            </div>
+
+            <div class="form-group">
+                <label for="specialRequests">Special Requests</label>
+                <textarea id="specialRequests" name="specialRequests" rows="3" placeholder="Any dietary requirements, allergies, or special requests..."></textarea>
+            </div>
+
+            <div class="step-navigation">
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn btn-primary" onclick="nextStep()" id="nextBtn4" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Confirmation -->
+        <div class="step-content" id="step-5">
+            <div class="step-header">
+                <h2>Booking Confirmation</h2>
+                <p>Review your booking details</p>
+            </div>
+            
+            <div id="booking-summary"></div>
+
+            <div class="step-navigation">
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn btn-primary" onclick="submitBooking()" id="submitBtn">
+                    📧 Submit Group Booking
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <p>Processing your booking...</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <h3>✅ Booking Submitted Successfully!</h3>
+                <p>You will receive a confirmation email shortly with your booking details.</p>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <h3>❌ Booking Failed</h3>
+                <p id="errorText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3002/api';
+        let currentStep = 1;
+        let currentMenus = [];
+        let currentMenuItems = [];
+        let selectedMenu = null;
+        let bookingData = {};
+
+        // Initialize the form
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMenus();
+            setupDateRestrictions();
+        });
+
+        // Set minimum date to tomorrow (24-hour rule)
+        function setupDateRestrictions() {
+            const dateInput = document.getElementById('date');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+        }
+
+        // Load available menus
+        async function loadMenus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menus`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentMenus = data.data;
+                }
+            } catch (error) {
+                console.error('Error loading menus:', error);
+            }
+        }
+
+        // Navigation functions
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < 5) {
+                    currentStep++;
+                    updateStepDisplay();
+                    
+                    // Special handling for step 3 (menu selection)
+                    if (currentStep === 3) {
+                        autoSelectMenu();
+                    }
+                    
+                    // Special handling for step 5 (confirmation)
+                    if (currentStep === 5) {
+                        showBookingSummary();
+                    }
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        }
+
+        function updateStepDisplay() {
+            // Update progress bar
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                } else if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+
+            // Update step content
+            document.querySelectorAll('.step-content').forEach((content, index) => {
+                content.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    content.classList.add('active');
+                }
+            });
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    return document.getElementById('partySize').value >= 2;
+                case 2:
+                    return document.getElementById('date').value && document.getElementById('time').value;
+                case 3:
+                    return selectedMenu && validateMenuSelections();
+                case 4:
+                    return document.getElementById('contactName').value && document.getElementById('contactEmail').value;
+                default:
+                    return true;
+            }
+        }
+
+        // Handle date change
+        function handleDateChange() {
+            const date = document.getElementById('date').value;
+            const timeSelect = document.getElementById('time');
+            
+            // Clear time options
+            timeSelect.innerHTML = '<option value="">Select a time</option>';
+            
+            if (date) {
+                // Add all possible time slots
+                const times = [
+                    { value: '12:00', text: '12:00 PM' },
+                    { value: '12:30', text: '12:30 PM' },
+                    { value: '13:00', text: '1:00 PM' },
+                    { value: '13:30', text: '1:30 PM' },
+                    { value: '14:00', text: '2:00 PM' },
+                    { value: '14:30', text: '2:30 PM' },
+                    { value: '15:00', text: '3:00 PM' },
+                    { value: '15:30', text: '3:30 PM' },
+                    { value: '18:00', text: '6:00 PM' },
+                    { value: '18:30', text: '6:30 PM' },
+                    { value: '19:00', text: '7:00 PM' },
+                    { value: '19:30', text: '7:30 PM' },
+                    { value: '20:00', text: '8:00 PM' }
+                ];
+                
+                times.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time.value;
+                    option.textContent = time.text;
+                    timeSelect.appendChild(option);
+                });
+            }
+            
+            updateNextButton();
+        }
+
+        // Handle time change
+        function handleTimeChange() {
+            updateNextButton();
+        }
+
+        // Auto-select menu based on date and time
+        function autoSelectMenu() {
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            
+            if (!date || !time) return;
+            
+            const selectedMenuType = getMenuForDateTime(date, time);
+            
+            if (selectedMenuType) {
+                selectedMenu = currentMenus.find(menu => menu.id === selectedMenuType);
+                
+                if (selectedMenu) {
+                    showMenuInfo();
+                    loadMenuItems();
+                }
+            }
+        }
+
+        // Determine menu based on date and time
+        function getMenuForDateTime(date, time) {
+            const bookingDate = new Date(date);
+            const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const hour = parseInt(time.split(':')[0]);
+            const minute = parseInt(time.split(':')[1]);
+            const timeInMinutes = hour * 60 + minute;
+            
+            console.log(`Checking menu for: ${date} (day ${dayOfWeek}) at ${time} (${timeInMinutes} minutes)`);
+            
+            // Sunday Lunch Menu: Sunday 12pm-5pm
+            if (dayOfWeek === 0 && 
+                (timeInMinutes >= 12 * 60 && timeInMinutes <= 17 * 60)) {
+                console.log('Selected: Sunday Lunch Menu');
+                return 'sunday-lunch';
+            }
+            
+            // Weekend Evening Menu: Friday, Saturday, Sunday 5pm-9pm
+            if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && 
+                (timeInMinutes >= 17 * 60 && timeInMinutes <= 21 * 60)) {
+                console.log('Selected: Weekend Evening Menu');
+                return 'weekend-evening';
+            }
+            
+            // Tea Time Menu: Daily 2pm-4pm
+            if (timeInMinutes >= 14 * 60 && timeInMinutes <= 16 * 60) {
+                console.log('Selected: Tea Time Menu');
+                return 'tea-time';
+            }
+            
+            // Lunch Menu: Monday-Friday 12pm-4:45pm
+            if ((dayOfWeek >= 1 && dayOfWeek <= 5) && 
+                (timeInMinutes >= 12 * 60 && timeInMinutes <= 16 * 60 + 45)) {
+                console.log('Selected: Lunch Menu');
+                return 'lunch';
+            }
+            
+            console.log('No menu available for this date and time');
+            return null;
+        }
+
+        // Show menu info
+        function showMenuInfo() {
+            const menuInfoCard = document.getElementById('menu-info-card');
+            const menuName = document.getElementById('selected-menu-name');
+            const menuDescription = document.getElementById('selected-menu-description');
+            
+            if (selectedMenu) {
+                menuName.textContent = selectedMenu.name;
+                menuDescription.textContent = `Served: ${selectedMenu.schedule}`;
+                menuInfoCard.style.display = 'block';
+            }
+        }
+
+        // Load menu items
+        async function loadMenuItems() {
+            if (!selectedMenu) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/menus/${selectedMenu.id}/items`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentMenuItems = data.data;
+                    generateMenuSelections();
+                    updateNextButton();
+                }
+            } catch (error) {
+                console.error('Error loading menu items:', error);
+            }
+        }
+
+        // Generate menu selection forms for each person
+        function generateMenuSelections() {
+            const partySize = parseInt(document.getElementById('partySize').value);
+            const container = document.getElementById('menuSelections');
+            container.innerHTML = '';
+
+            for (let i = 0; i < partySize; i++) {
+                const personDiv = document.createElement('div');
+                personDiv.className = 'menu-selection';
+                personDiv.innerHTML = `
+                    <div class="person-header">
+                        <h3>Person ${i + 1}</h3>
+                        ${i > 1 ? '<button type="button" class="remove-person" onclick="removePerson(' + i + ')">Remove</button>' : ''}
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="person_${i}_name" placeholder="Enter name" required>
+                    </div>
+                    ${generateCourseSelections(i)}
+                `;
+                container.appendChild(personDiv);
+            }
+        }
+
+        // Generate course selections for a person
+        function generateCourseSelections(personIndex) {
+            const courses = ['Starters', 'Mains', 'Desserts'];
+            let html = '';
+
+            courses.forEach(course => {
+                const courseItems = currentMenuItems.filter(item => 
+                    item.section_key.toLowerCase().includes(course.toLowerCase())
+                );
+
+                if (courseItems.length > 0) {
+                    html += `
+                        <div class="course-selection">
+                            <label>${course} *</label>
+                            <div class="course-items">
+                                ${courseItems.map(item => `
+                                    <div class="menu-item" onclick="selectMenuItem(${personIndex}, '${course}', '${item.name}', ${item.price})">
+                                        <span>${item.name}</span>
+                                        <span class="price">£${item.price}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            return html;
+        }
+
+        // Select a menu item for a person
+        function selectMenuItem(personIndex, course, itemName, price) {
+            // Remove previous selection for this course
+            const personDiv = document.querySelector(`input[name="person_${personIndex}_name"]`).closest('.menu-selection');
+            const courseItems = personDiv.querySelectorAll(`[data-course="${course}"]`);
+            courseItems.forEach(item => item.classList.remove('selected'));
+
+            // Add selection to this item
+            event.target.closest('.menu-item').classList.add('selected');
+            event.target.closest('.menu-item').setAttribute('data-course', course);
+            event.target.closest('.menu-item').setAttribute('data-item', itemName);
+            event.target.closest('.menu-item').setAttribute('data-price', price);
+            
+            updateNextButton();
+        }
+
+        // Validate menu selections
+        function validateMenuSelections() {
+            const partySize = parseInt(document.getElementById('partySize').value);
+            const courses = ['Starters', 'Mains', 'Desserts'];
+            
+            for (let i = 0; i < partySize; i++) {
+                const personName = document.querySelector(`input[name="person_${i}_name"]`).value;
+                if (!personName) return false;
+                
+                const personDiv = document.querySelector(`input[name="person_${i}_name"]`).closest('.menu-selection');
+                
+                for (let course of courses) {
+                    const selectedItem = personDiv.querySelector(`[data-course="${course}"].selected`);
+                    if (!selectedItem) return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Change party size
+        function changePartySize(delta) {
+            const partySizeInput = document.getElementById('partySize');
+            const currentSize = parseInt(partySizeInput.value);
+            const newSize = Math.max(2, Math.min(20, currentSize + delta));
+            
+            partySizeInput.value = newSize;
+            
+            if (currentMenuItems.length > 0) {
+                generateMenuSelections();
+            }
+        }
+
+        // Remove a person
+        function removePerson(personIndex) {
+            const partySizeInput = document.getElementById('partySize');
+            const currentSize = parseInt(partySizeInput.value);
+            
+            if (currentSize > 2) {
+                partySizeInput.value = currentSize - 1;
+                generateMenuSelections();
+            }
+        }
+
+        // Update next button state
+        function updateNextButton() {
+            const nextBtn = document.getElementById(`nextBtn${currentStep}`);
+            if (nextBtn) {
+                nextBtn.disabled = !validateCurrentStep();
+            }
+        }
+
+        // Show booking summary
+        function showBookingSummary() {
+            const summary = document.getElementById('booking-summary');
+            const partySize = parseInt(document.getElementById('partySize').value);
+            
+            let summaryHTML = `
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #752f15; margin-bottom: 15px;">Booking Summary</h3>
+                    <p><strong>Date:</strong> ${document.getElementById('date').value}</p>
+                    <p><strong>Time:</strong> ${document.getElementById('time').value}</p>
+                    <p><strong>Party Size:</strong> ${partySize} people</p>
+                    <p><strong>Menu:</strong> ${selectedMenu ? selectedMenu.name : 'Not selected'}</p>
+                    <p><strong>Contact:</strong> ${document.getElementById('contactName').value}</p>
+                    <p><strong>Email:</strong> ${document.getElementById('contactEmail').value}</p>
+                </div>
+            `;
+            
+            summary.innerHTML = summaryHTML;
+        }
+
+        // Submit booking
+        async function submitBooking() {
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Hide previous messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                // Collect form data
+                const partySize = parseInt(document.getElementById('partySize').value);
+                const bookingData = {
+                    date: document.getElementById('date').value,
+                    time: document.getElementById('time').value,
+                    partySize: partySize,
+                    contactName: document.getElementById('contactName').value,
+                    contactEmail: document.getElementById('contactEmail').value,
+                    specialRequests: document.getElementById('specialRequests').value
+                };
+
+                // Collect menu selections
+                const menuSelections = [];
+                for (let i = 0; i < partySize; i++) {
+                    const personName = document.querySelector(`input[name="person_${i}_name"]`).value;
+                    const personDiv = document.querySelector(`input[name="person_${i}_name"]`).closest('.menu-selection');
+                    const selectedItems = personDiv.querySelectorAll('.menu-item.selected');
+                    
+                    const selections = [];
+                    selectedItems.forEach(item => {
+                        selections.push({
+                            course: item.getAttribute('data-course'),
+                            item: item.getAttribute('data-item'),
+                            price: parseFloat(item.getAttribute('data-price'))
+                        });
+                    });
+                    
+                    menuSelections.push({
+                        name: personName,
+                        selections: selections
+                    });
+                }
+
+                // Submit to API
+                const response = await fetch(`${API_BASE_URL}/booking`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bookingData: bookingData,
+                        menuSelections: menuSelections,
+                        contactEmail: bookingData.contactEmail
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    successMessage.style.display = 'block';
+                } else {
+                    throw new Error(result.error || 'Booking failed');
+                }
+
+            } catch (error) {
+                console.error('Booking error:', error);
+                document.getElementById('errorText').textContent = error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
